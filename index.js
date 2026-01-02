@@ -6,14 +6,17 @@ const nodemailer = require('nodemailer');
 const axios = require('axios');
 
 const app = express();
-app.use(cors(
-{
+
+app.use(cors({
   origin: [
     'http://localhost:4200',
-    'https://incredible-gaufre-a0e991.netlify.app/'
-  ]
-}
-));
+    'https://incredible-gaufre-a0e991.netlify.app/' // change if needed
+  ],
+  methods: ['GET', 'POST'],
+  allowedHeaders: ['Content-Type', 'api-key'],
+  credentials: false
+}));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
