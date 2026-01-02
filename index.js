@@ -36,8 +36,8 @@ app.post('/send-email', async (req, res) => {
 
     // 📩 Mail to Astroguide team
     await transporter.sendMail({
-      from: `Astroguide <${process.env.BREVO_USER}>`,
-      to: 'contact@astroguide.in', // Astroguide inbox
+      from: process.env.BREVO_USER,
+      to: 'madhura.patkar5@gmail.in', // Astroguide inbox
       replyTo: email, // reply goes to user
       subject: 'New Contact Us Enquiry',
       html: `
@@ -52,7 +52,7 @@ app.post('/send-email', async (req, res) => {
     //auto reply
 
     await transporter.sendMail({
-      from: `Astroguide <${process.env.BREVO_USER}>`,
+      from: process.env.BREVO_USER,
       to: email,
       subject: 'We received your message – Astroguide',
       html: `
