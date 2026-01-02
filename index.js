@@ -70,9 +70,12 @@ app.post('/send-email', async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Unable to send email' });
-  }
+  console.error('SMTP ERROR >>>', err);
+  res.status(500).json({
+    error: err.message,
+    code: err.code
+  });
+}
 });
 
 const PORT = process.env.PORT || 5000;
