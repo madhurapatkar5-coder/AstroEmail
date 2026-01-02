@@ -10,7 +10,7 @@ const app = express();
 app.use(cors({
   origin: [
     'http://localhost:4200',
-    'https://incredible-gaufre-a0e991.netlify.app/' // change if needed
+    'https://incredible-gaufre-a0e991.netlify.app' // change if needed
   ],
   methods: ['GET', 'POST'],
   allowedHeaders: ['Content-Type', 'api-key'],
