@@ -3,15 +3,16 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+const axios = require('axios');
 
 const app = express();
 app.use(cors(
-  {
-    origin: [
-      'http://localhost:4200',
-      'https://incredible-gaufre-a0e991.netlify.app/'
-    ]
-  }
+{
+  origin: [
+    'http://localhost:4200',
+    'https://incredible-gaufre-a0e991.netlify.app/'
+  ]
+}
 ));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -24,56 +25,68 @@ app.post('/send-email', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
 
-    const transporter = nodemailer.createTransport({
-      host: 'smtp-relay.brevo.com',
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.BREVO_USER,
-        pass: process.env.BREVO_PASS
+    await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: {
+          name: 'Astroguide',
+          email: process.env.BREVO_USER
+        },
+        to: [
+          { email: 'contact@astroguide.in' }
+        ],
+        replyTo: {
+          email: email
+        },
+        subject: 'New Contact Us Enquiry',
+        htmlContent: `
+          <h3>New Enquiry</h3>
+          <p><b>Name:</b> ${name}</p>
+          <p><b>Email:</b> ${email}</p>
+          <p><b>Phone:</b> ${phone}</p>
+          <p><b>Message:</b> ${message}</p>
+        `
+      },
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
       }
-    });
+    );
 
-    // 📩 Mail to Astroguide team
-    await transporter.sendMail({
-      from: process.env.BREVO_USER,
-      to: 'madhura.patkar5@gmail.in', // Astroguide inbox
-      replyTo: email, // reply goes to user
-      subject: 'New Contact Us Enquiry',
-      html: `
-        <h3>New Enquiry from Astroguide Website</h3>
-        <p><b>Name:</b> ${name}</p>
-        <p><b>Email:</b> ${email}</p>
-        <p><b>Phone:</b> ${phone}</p>
-        <p><b>Message:</b> ${message}</p>
-      `
-    });
-
-    //auto reply
-
-    await transporter.sendMail({
-      from: process.env.BREVO_USER,
-      to: email,
-      subject: 'We received your message – Astroguide',
-      html: `
-        <p>Dear ${name},</p>
-
-        <p>Thank you for contacting <b>Astroguide</b>.</p>
-
-        <p>We have received your message and our team will get back to you shortly.</p>
-
-        <p>Warm regards,<br>
-        <b>Astroguide Team</b></p>
-      `
-    });
+    /* OPTIONAL AUTO-REPLY */
+    await axios.post(
+      'https://api.brevo.com/v3/smtp/email',
+      {
+        sender: {
+          name: 'Astroguide',
+          email: process.env.BREVO_USER
+        },
+        to: [{ email }],
+        subject: 'We received your message – Astroguide',
+        htmlContent: `
+          <p>Dear ${name},</p>
+          <p>Thank you for contacting <b>Astroguide</b>.</p>
+          <p>We will get back to you shortly.</p>
+          <p>Regards,<br>Astroguide Team</p>
+        `
+      },
+      {
+        headers: {
+          'api-key': process.env.BREVO_API_KEY,
+          'Content-Type': 'application/json'
+        }
+      }
+    );
 
     res.json({ success: true });
 
   } catch (err) {
-    console.error('SMTP ERROR >>>', err);
+    console.error('BREVO API ERROR:', err.response?.data || err.message);
     res.status(500).json({
-      error: err.message,
-      code: err.code
+      error: err.response?.data || err.message
     });
   }
 });
