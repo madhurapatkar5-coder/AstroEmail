@@ -6,12 +6,12 @@ const nodemailer = require('nodemailer');
 
 const app = express();
 app.use(cors(
-{
-  origin: [
-    'http://localhost:4200',
-    'https://incredible-gaufre-a0e991.netlify.app/'
-  ]
-}
+  {
+    origin: [
+      'http://localhost:4200',
+      'https://incredible-gaufre-a0e991.netlify.app/'
+    ]
+  }
 ));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -26,8 +26,8 @@ app.post('/send-email', async (req, res) => {
 
     const transporter = nodemailer.createTransport({
       host: 'smtp-relay.brevo.com',
-      port: 587,
-      secure: false,
+      port: 465,
+      secure: true,
       auth: {
         user: process.env.BREVO_USER,
         pass: process.env.BREVO_PASS
@@ -70,12 +70,12 @@ app.post('/send-email', async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-  console.error('SMTP ERROR >>>', err);
-  res.status(500).json({
-    error: err.message,
-    code: err.code
-  });
-}
+    console.error('SMTP ERROR >>>', err);
+    res.status(500).json({
+      error: err.message,
+      code: err.code
+    });
+  }
 });
 
 const PORT = process.env.PORT || 5000;
