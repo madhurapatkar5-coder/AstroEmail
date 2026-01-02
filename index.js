@@ -30,7 +30,7 @@ app.post('/send-email', async (req, res) => {
       secure: false,
       auth: {
         user: process.env.BREVO_USER,
-        pass: process.env.BREVO_P
+        pass: process.env.BREVO_PASS
       }
     });
 
