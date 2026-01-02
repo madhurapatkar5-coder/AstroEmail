@@ -33,7 +33,7 @@ app.post('/send-email', async (req, res) => {
           email: process.env.BREVO_USER
         },
         to: [
-          { email: 'contact@astroguide.in' }
+          { email: 'madhura.patkar5@gmail.com' }
         ],
         replyTo: {
           email: email
