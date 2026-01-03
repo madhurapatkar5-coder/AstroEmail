@@ -24,38 +24,38 @@ app.get('/ping', (req, res) => {
   res.json({ status: 'API working' });
 });
 
+
 app.post('/send-email', async (req, res) => {
   try {
     const { name, email, phone, message } = req.body;
+    const payload = {
+      sender: {
+        name: 'Astroguide',
+        email: process.env.BREVO_USER
+      },
+      to: [{ email: 'madhura.patkar5@gmail.com' }],
+      subject: 'New Contact Us Enquiry',
+      htmlContent: `
+    <h3>New Enquiry</h3>
+    <p><b>Name:</b> ${name}</p>
+    <p><b>Email:</b> ${email || 'Not provided'}</p>
+    <p><b>Phone:</b> ${phone}</p>
+    <p><b>Message:</b> ${message}</p>`
+    };
+
+    // add replyTo only if email exists
+    if (email) {
+      payload.replyTo = { email };
+    }
 
     await axios.post(
       'https://api.brevo.com/v3/smtp/email',
-      {
-        sender: {
-          name: 'Astroguide',
-          email: process.env.BREVO_USER
-        },
-        to: [
-          { email: 'madhura.patkar5@gmail.com' }
-        ],
-        replyTo: {
-          email: email
-        },
-        subject: 'New Contact Us Enquiry',
-        htmlContent: `
-          <h3>New Enquiry</h3>
-          <p><b>Name:</b> ${name}</p>
-          <p><b>Email:</b> ${email}</p>
-          <p><b>Phone:</b> ${phone}</p>
-          <p><b>Message:</b> ${message}</p>
-        `
-      },
+      payload,
       {
         headers: {
           'api-key': process.env.BREVO_API_KEY,
           'Content-Type': 'application/json'
-        },
-        timeout: 10000
+        }
       }
     );
 
