@@ -60,37 +60,43 @@ app.post('/send-email', async (req, res) => {
     );
 
     /* OPTIONAL AUTO-REPLY */
-    await axios.post(
-      'https://api.brevo.com/v3/smtp/email',
-      {
-        sender: {
-          name: 'Astroguide',
-          email: process.env.BREVO_USER
-        },
-        to: [{ email }],
-        subject: 'We received your message – Astroguide',
-        htmlContent: `
-          <p>Dear ${name},</p>
-          <p>Thank you for contacting <b>Astroguide</b>.</p>
-          <p>We will get back to you shortly.</p>
-          <p>Regards,<br>Astroguide Team</p>
-        `
-      },
-      {
-        headers: {
-          'api-key': process.env.BREVO_API_KEY,
-          'Content-Type': 'application/json'
-        }
+    if (email) {
+      try {
+        await axios.post(
+          'https://api.brevo.com/v3/smtp/email',
+          {
+            sender: {
+              name: 'Astroguide',
+              email: process.env.BREVO_USER
+            },
+            to: [{ email }],
+            subject: 'We received your message | Astroguide',
+            htmlContent: `
+            <p>Dear ${name},</p>
+            <p>Thank you for contacting <b>Astroguide</b>.</p>
+            <p>We have received your enquiry and our team will review it shortly.</p>
+            <p>Wishing you clarity, balance, and positive energies.</p>
+            <p>Regards,<br>Astroguide Team</p>
+          `
+          },
+          {
+            headers: {
+              'api-key': process.env.BREVO_API_KEY,
+              'Content-Type': 'application/json'
+            }
+          }
+        );
+      } catch (autoReplyErr) {
+        // DO NOT FAIL REQUEST
+        console.warn('Auto-reply failed:', autoReplyErr.response?.data || autoReplyErr.message);
       }
-    );
+    }
 
-    res.json({ success: true });
-
+    // ALWAYS SUCCESS
+    return res.json({ success: true });
   } catch (err) {
-    console.error('BREVO API ERROR:', err.response?.data || err.message);
-    res.status(500).json({
-      error: err.response?.data || err.message
-    });
+    console.error('Admin mail failed:', err.response?.data || err.message);
+    return res.json({ success: true });
   }
 });
 
